@@ -1,7 +1,6 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -12,7 +11,6 @@ const config: Config = {
         primary: 'hsl(var(--primary))',
         card: 'hsl(var(--card))',
         ring: 'hsl(var(--ring))',
-        /* Adicione outras cores conforme necessário */
       },
     },
   },

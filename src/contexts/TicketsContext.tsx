@@ -95,8 +95,24 @@ export const TicketsProvider = ({ children }: { children: ReactNode }) => {
         if (jsonData.length === 0) throw new Error('Planilha sem dados.');
 
         const processedData: Ticket[] = jsonData.map((row) => {
-          const created = row.Created ? new Date(row.Created) : null;
-          const resolved = row.Resolved ? new Date(row.Resolved) : null;
+          let created = null;
+if (row.Created) {
+  // Se vier como número (formato Excel)
+  if (!isNaN(row.Created)) {
+    created = new Date(Math.round((row.Created - 25569) * 86400 * 1000));
+  } else {
+    // Se vier como string ISO ou data compatível
+    created = new Date(row.Created);
+  }
+}
+let resolved = null;
+if (row.Resolved) {
+  if (!isNaN(row.Resolved)) {
+    resolved = new Date(Math.round((row.Resolved - 25569) * 86400 * 1000));
+  } else {
+    resolved = new Date(row.Resolved);
+  }
+}
           const resolutionTimeHours = created && resolved ? (resolved.getTime() - created.getTime()) / (1000 * 60 * 60) : null;
 
           let supportLevel = 'Outros';

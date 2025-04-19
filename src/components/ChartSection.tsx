@@ -2,8 +2,6 @@ import React, { useMemo, useEffect } from 'react';
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   XAxis,
@@ -56,7 +54,7 @@ const ChartSection: React.FC = () => {
         tickets[ticket.month] = (tickets[ticket.month] || 0) + 1;
       }
     });
-    return Object.entries(tickets)
+    const result = Object.entries(tickets)
       .map(([month, total]) => ({
         month: month.substring(5) + '/' + month.substring(0, 4),
         total,
@@ -66,6 +64,8 @@ const ChartSection: React.FC = () => {
         const [monthB, yearB] = b.month.split('/').map(Number);
         return new Date(yearA, monthA - 1).getTime() - new Date(yearB, monthB - 1).getTime();
       });
+    console.log('✅ ticketsByMonth:', result);
+    return result;
   }, [filteredData]);
 
   const ticketsByLevel = useMemo<TicketByLevel[]>(() => {
@@ -76,7 +76,9 @@ const ChartSection: React.FC = () => {
         levels[ticket.supportLevel] = (levels[ticket.supportLevel] || 0) + 1;
       }
     });
-    return Object.entries(levels).map(([name, value]) => ({ name, value }));
+    const result = Object.entries(levels).map(([name, value]) => ({ name, value }));
+    console.log('✅ ticketsByLevel:', result);
+    return result;
   }, [filteredData]);
 
   const analystPerformance = useMemo<AnalystData[]>(() => {
@@ -95,9 +97,11 @@ const ChartSection: React.FC = () => {
         if (ticket.Resolved) performance[ticket.Assignee].resolved++;
       }
     });
-    return Object.values(performance)
+    const result = Object.values(performance)
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
+    console.log('✅ analystPerformance:', result);
+    return result;
   }, [filteredData]);
 
   const resolutionTime = useMemo<ResolutionTimeData[]>(() => {
@@ -116,13 +120,15 @@ const ChartSection: React.FC = () => {
         resolution[ticket.Assignee].count++;
       }
     });
-    return Object.values(resolution)
+    const result = Object.values(resolution)
       .map(({ name, totalTime, count }) => ({
         name,
         avgTime: totalTime / count,
       }))
       .sort((a, b) => a.avgTime - b.avgTime)
       .slice(0, 10);
+    console.log('✅ resolutionTime:', result);
+    return result;
   }, [filteredData]);
 
   const hasData = filteredData && filteredData.length > 0;
@@ -146,7 +152,7 @@ const ChartSection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card">
           <h2 className="card-header">Volume de Tickets por Mês</h2>
-          <div className="h-80">
+          <div className="h-80 min-h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ticketsByMonth} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -162,7 +168,7 @@ const ChartSection: React.FC = () => {
 
         <div className="card">
           <h2 className="card-header">Distribuição por Nível de Suporte</h2>
-          <div className="h-80">
+          <div className="h-80 min-h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -190,7 +196,7 @@ const ChartSection: React.FC = () => {
 
       <div className="card">
         <h2 className="card-header">Desempenho por Analista</h2>
-        <div className="h-96">
+        <div className="h-96 min-h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={analystPerformance} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
@@ -207,7 +213,7 @@ const ChartSection: React.FC = () => {
 
       <div className="card">
         <h2 className="card-header">Tempo Médio de Resolução por Analista (horas)</h2>
-        <div className="h-96">
+        <div className="h-96 min-h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={resolutionTime} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />

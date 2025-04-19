@@ -27,6 +27,21 @@ interface KPIs {
   avgResolutionTime: number;
   resolutionRate: number;
   avgCostPerTicket: number;
+  costPerMonth: Record<string, number>;
+}
+
+interface AnalystProjection {
+  level: string;
+  currentTickets: number;
+  projectedTickets: number;
+  currentAnalysts: number;
+  neededAnalysts: number;
+  additionalAnalysts: number;
+}
+
+interface Insight {
+  level: string;
+  message: string;
 }
 
 interface TicketsContextType {
@@ -42,8 +57,8 @@ interface TicketsContextType {
   uploadedFile: string | null;
   processExcelFile: (file: File) => void;
   kpis: KPIs;
-  analystProjection: any[];
-  insights: any[];
+  analystProjection: AnalystProjection[];
+  insights: Insight[];
   forceUpdate: number;
 }
 
@@ -194,35 +209,52 @@ export const TicketsProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const levelToSalary: Record<string, number> = useMemo(() => ({
+    'Nível 1': salaries.nivel_1,
+    'Nível 2': salaries.nivel_2,
+    'Nível 3': salaries.nivel_3,
+    'Outros': (salaries.nivel_1 + salaries.nivel_2 + salaries.nivel_3) / 3,
+  }), [salaries]);
+
   const kpis = useMemo<KPIs>(() => {
-    if (filteredData.length === 0) {
-      return { totalTickets: 0, avgResolutionTime: 0, resolutionRate: 0, avgCostPerTicket: 0 };
-    }
-
+    const resolved = filteredData.filter(t => t.Resolved);
     const totalTickets = filteredData.length;
-    const resolvedTickets = filteredData.filter(ticket => ticket.Resolved);
-    const resolutionRate = (resolvedTickets.length / totalTickets) * 100;
-    const avgResolutionTime = resolvedTickets.reduce((sum, ticket) => sum + (ticket.resolutionTimeHours || 0), 0) / (resolvedTickets.length || 1);
+    const resolutionRate = resolved.length / totalTickets * 100;
+    const avgResolutionTime = resolved.reduce((sum, t) => sum + (t.resolutionTimeHours || 0), 0) / (resolved.length || 1);
 
-    const levelToSalaryPerHour = {
-      'Nível 1': salaries.nivel_1 / 160,
-      'Nível 2': salaries.nivel_2 / 160,
-      'Nível 3': salaries.nivel_3 / 160,
-      'Outros': (salaries.nivel_1 + salaries.nivel_2 + salaries.nivel_3) / (3 * 160),
-    };
+    const costPerMonth: Record<string, number> = {};
+    const monthlyTickets: Record<string, Ticket[]> = {};
 
-    let totalCost = 0;
-    resolvedTickets.forEach(ticket => {
-      const level = ticket.supportLevel || 'Outros';
-      const hours = ticket.resolutionTimeHours || 0;
-      const hourlyRate = levelToSalaryPerHour[level as keyof typeof levelToSalaryPerHour] || 0;
-      totalCost += hourlyRate * hours;
+    resolved.forEach(ticket => {
+      if (!ticket.month) return;
+      if (!monthlyTickets[ticket.month]) monthlyTickets[ticket.month] = [];
+      monthlyTickets[ticket.month].push(ticket);
     });
 
-    const avgCostPerTicket = totalCost / (resolvedTickets.length || 1);
+    Object.entries(monthlyTickets).forEach(([month, tickets]) => {
+      const byLevel: Record<string, number> = {};
+      tickets.forEach(ticket => {
+        const level = ticket.supportLevel || 'Outros';
+        byLevel[level] = (byLevel[level] || 0) + 1;
+      });
+      let totalCost = 0;
+      Object.entries(byLevel).forEach(([level, count]) => {
+        totalCost += (levelToSalary[level] || 0) * (count / tickets.length);
+      });
+      costPerMonth[month] = totalCost;
+    });
 
-    return { totalTickets, avgResolutionTime, resolutionRate, avgCostPerTicket };
-  }, [filteredData, salaries]);
+    const allCosts = Object.values(costPerMonth);
+    const avgCostPerTicket = allCosts.reduce((a, b) => a + b, 0) / (allCosts.length || 1);
+
+    return {
+      totalTickets,
+      avgResolutionTime,
+      resolutionRate,
+      avgCostPerTicket,
+      costPerMonth
+    };
+  }, [filteredData, levelToSalary]);
 
   const value: TicketsContextType = {
     originalData,

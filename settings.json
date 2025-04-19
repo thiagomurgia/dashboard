@@ -1,0 +1,17 @@
+{
+    "css.lint.unknownAtRules": "ignore",
+    "tailwindCSS.experimental.classRegex": [
+      "tw`([^`]*)", 
+      "tw=\"([^\"]*)", 
+      "tw={\"([^\"}]*)", 
+      "tw\\.\\w+`([^`]*)"
+    ],
+    "tailwindCSS.includeLanguages": {
+      "plaintext": "html",
+      "javascript": "javascript",
+      "typescript": "typescript",
+      "javascriptreact": "javascript",
+      "typescriptreact": "typescript"
+    }
+  }
+  

@@ -96,23 +96,21 @@ export const TicketsProvider = ({ children }: { children: ReactNode }) => {
 
         const processedData: Ticket[] = jsonData.map((row) => {
           let created = null;
-if (row.Created) {
-  // Se vier como número (formato Excel)
-  if (!isNaN(row.Created)) {
-    created = new Date(Math.round((row.Created - 25569) * 86400 * 1000));
-  } else {
-    // Se vier como string ISO ou data compatível
-    created = new Date(row.Created);
-  }
-}
-let resolved = null;
-if (row.Resolved) {
-  if (!isNaN(row.Resolved)) {
-    resolved = new Date(Math.round((row.Resolved - 25569) * 86400 * 1000));
-  } else {
-    resolved = new Date(row.Resolved);
-  }
-}
+          if (row.Created) {
+            if (!isNaN(row.Created)) {
+              created = new Date(Math.round((row.Created - 25569) * 86400 * 1000));
+            } else {
+              created = new Date(row.Created);
+            }
+          }
+          let resolved = null;
+          if (row.Resolved) {
+            if (!isNaN(row.Resolved)) {
+              resolved = new Date(Math.round((row.Resolved - 25569) * 86400 * 1000));
+            } else {
+              resolved = new Date(row.Resolved);
+            }
+          }
           const resolutionTimeHours = created && resolved ? (resolved.getTime() - created.getTime()) / (1000 * 60 * 60) : null;
 
           let supportLevel = 'Outros';
@@ -200,28 +198,25 @@ if (row.Resolved) {
     if (filteredData.length === 0) {
       return { totalTickets: 0, avgResolutionTime: 0, resolutionRate: 0, avgCostPerTicket: 0 };
     }
+
     const totalTickets = filteredData.length;
     const resolvedTickets = filteredData.filter(ticket => ticket.Resolved);
     const resolutionRate = (resolvedTickets.length / totalTickets) * 100;
     const avgResolutionTime = resolvedTickets.reduce((sum, ticket) => sum + (ticket.resolutionTimeHours || 0), 0) / (resolvedTickets.length || 1);
 
-    const levelToSalary = {
-      'Nível 1': salaries.nivel_1,
-      'Nível 2': salaries.nivel_2,
-      'Nível 3': salaries.nivel_3,
-      'Outros': (salaries.nivel_1 + salaries.nivel_2 + salaries.nivel_3) / 3,
+    const levelToSalaryPerHour = {
+      'Nível 1': salaries.nivel_1 / 160,
+      'Nível 2': salaries.nivel_2 / 160,
+      'Nível 3': salaries.nivel_3 / 160,
+      'Outros': (salaries.nivel_1 + salaries.nivel_2 + salaries.nivel_3) / (3 * 160),
     };
 
-    const ticketsByLevel: Record<string, number> = {};
+    let totalCost = 0;
     resolvedTickets.forEach(ticket => {
       const level = ticket.supportLevel || 'Outros';
-      ticketsByLevel[level] = (ticketsByLevel[level] || 0) + 1;
-    });
-
-    let totalCost = 0;
-    Object.entries(ticketsByLevel).forEach(([level, count]) => {
-      totalCost += levelToSalary[level as keyof typeof levelToSalary] || 0;
-
+      const hours = ticket.resolutionTimeHours || 0;
+      const hourlyRate = levelToSalaryPerHour[level as keyof typeof levelToSalaryPerHour] || 0;
+      totalCost += hourlyRate * hours;
     });
 
     const avgCostPerTicket = totalCost / (resolvedTickets.length || 1);
@@ -242,8 +237,8 @@ if (row.Resolved) {
     uploadedFile,
     processExcelFile,
     kpis,
-    analystProjection: [], // você pode substituir depois
-    insights: [],          // você pode substituir depois
+    analystProjection: [],
+    insights: [],
     forceUpdate,
   };
 

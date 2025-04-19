@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { useTickets } from '../contexts/TicketsContext';
 
-const KpiSection = () => {
+const KpiSection: React.FC = () => {
   const { kpis, filteredData, originalData } = useTickets();
 
-  // Log para depuração
   useEffect(() => {
     console.log('KpiSection renderizado');
     console.log('KPIs:', kpis);
@@ -12,23 +11,19 @@ const KpiSection = () => {
     console.log('Dados originais:', originalData?.length || 0);
   }, [kpis, filteredData, originalData]);
 
-  // Formatar números para exibição
-  const formatNumber = (num) => {
+  const formatNumber = (num: number): string => {
     return new Intl.NumberFormat('pt-BR').format(num);
   };
 
-  // Formatar valor monetário
-  const formatCurrency = (value) => {
+  const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
   };
 
-  // Verificar se há dados para renderizar
   const hasData = filteredData && filteredData.length > 0;
 
-  // Renderização condicional com mensagem quando não há dados
   if (!hasData) {
     return (
       <div className="card">
@@ -49,21 +44,21 @@ const KpiSection = () => {
           <span className="kpi-value text-blue-600">{formatNumber(kpis.totalTickets)}</span>
           <span className="kpi-label">Total de Tickets</span>
         </div>
-        
+
         <div className="kpi-card">
           <span className="kpi-value text-indigo-600">
             {kpis.avgResolutionTime.toFixed(1)}h
           </span>
           <span className="kpi-label">Tempo Médio de Resolução</span>
         </div>
-        
+
         <div className="kpi-card">
           <span className="kpi-value text-green-600">
             {kpis.resolutionRate.toFixed(1)}%
           </span>
           <span className="kpi-label">Taxa de Resolução</span>
         </div>
-        
+
         <div className="kpi-card">
           <span className="kpi-value text-red-600">
             {formatCurrency(kpis.avgCostPerTicket)}

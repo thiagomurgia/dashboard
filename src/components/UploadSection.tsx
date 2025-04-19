@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTickets } from '../contexts/TicketsContext';
 
-const UploadSection = () => {
+const UploadSection: React.FC = () => {
   const { uploadedFile, processExcelFile, errors, filteredData, originalData, forceUpdate } = useTickets();
   const [isDragging, setIsDragging] = useState(false);
   const [ticketCount, setTicketCount] = useState(0);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Logs detalhados para depuração
   useEffect(() => {
     console.log('===== UPLOAD SECTION RENDERIZADO =====');
     console.log('uploadedFile:', uploadedFile);
@@ -18,7 +17,6 @@ const UploadSection = () => {
     console.log('ticketCount:', ticketCount);
   }, [uploadedFile, originalData, filteredData, forceUpdate, errors, ticketCount]);
 
-  // Atualiza a contagem de tickets quando os dados mudam
   useEffect(() => {
     if (originalData && originalData.length > 0) {
       console.log('Atualizando contagem de tickets para:', originalData.length);
@@ -26,7 +24,7 @@ const UploadSection = () => {
     }
   }, [originalData]);
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
@@ -35,10 +33,10 @@ const UploadSection = () => {
     setIsDragging(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       console.log('Arquivo recebido via drag-and-drop:', file.name);
@@ -50,7 +48,7 @@ const UploadSection = () => {
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       console.log('Arquivo selecionado via input:', file.name);
@@ -64,18 +62,15 @@ const UploadSection = () => {
 
   const handleClick = () => {
     console.log('Clique no seletor de arquivo');
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
-  // Função para recarregar/limpar e permitir um novo upload
   const handleReload = () => {
     console.log('Solicitando novo upload de arquivo');
-    // Limpa o input de arquivo para permitir selecionar o mesmo arquivo novamente
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    // Abre o seletor de arquivo
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
   return (
@@ -99,13 +94,13 @@ const UploadSection = () => {
         />
         <p>Arraste e solte ou selecione um arquivo Excel</p>
       </div>
-      
+
       {errors.upload && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-red-600">
           {errors.upload}
         </div>
       )}
-      
+
       {uploadedFile && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
           <h3 className="font-semibold">Arquivo carregado: {uploadedFile}</h3>

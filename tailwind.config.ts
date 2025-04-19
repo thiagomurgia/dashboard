@@ -12,6 +12,7 @@ const config: Config = {
         primary: 'hsl(var(--primary))',
         card: 'hsl(var(--card))',
         ring: 'hsl(var(--ring))',
+        /* Adicione outras cores conforme necessário */
       },
     },
   },

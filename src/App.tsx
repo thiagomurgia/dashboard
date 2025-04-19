@@ -4,7 +4,7 @@ import UploadSection from './components/UploadSection';
 import FilterSection from './components/FilterSection';
 import KpiSection from './components/KpiSection';
 import ChartSection from './components/ChartSection';
-import AnalystProjection from './components/AnalystProjection';
+import AnalystProjection from './components/AnalystProjection'
 import InsightsSection from './components/InsightsSection';
 import Footer from './components/Footer';
 import { TicketsProvider } from './contexts/TicketsContext';
